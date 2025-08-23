@@ -29,39 +29,40 @@ jobs:
       - name: Prepare Capacitor in frontend
         working-directory: frontend
         run: |
-          # pakiety potrzebne do Capacitora i Androida
+          # pakiety do Capacitora + Androida
           npm install --save-dev @capacitor/core @capacitor/cli @capacitor/android
-          # TypeScript jest wymagany, bo config jest .ts
-          npm install --save-dev typescript ts-node
-          # kopiujemy nasz config do frontu
+          # U CIEBIE plik jest w mobile/mobile/ (zostawiamy tę ścieżkę)
           cp ../mobile/mobile/capacitor.config.json ./capacitor.config.json
           npx cap add android
           npx cap sync android
 
-      # ---- Toolchain Android + Java ----         - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: "21"
+      # ---- Toolchain Android + Java ----
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-    - name: Install Android 35 SDK + Build-Tools
-      run: |
-        sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Install Android 35 SDK + Build-Tools
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-    - name: Bump compileSdkVersion to 35
-      run: |
-        sed -i 's/compileSdkVersion = [0-9]\+/compileSdkVersion = 35/' frontend/android/variables.gradle || true
-        sed -i 's/compileSdkVersion=[0-9]\+/compileSdkVersion=35/' frontend/android/variables.gradle || true
+      # ---- Podbij compileSdk do 35 (Capacitor >= 6 tego wymaga) ----
+      - name: Bump compileSdkVersion to 35
+        run: |
+          sed -i 's/compileSdkVersion = [0-9]\+/compileSdkVersion = 35/' frontend/android/variables.gradle || true
+          sed -i 's/compileSdkVersion=[0-9]\+/compileSdkVersion=35/' frontend/android/variables.gradle || true
 
-    - name: Build Debug APK
-      working-directory: frontend/android
-      run: ./gradlew assembleDebug
+      # ---- Build APK ----
+      - name: Build Debug APK
+        working-directory: frontend/android
+        run: ./gradlew assembleDebug
 
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug-apk
-        path: frontend/android/app/build/outputs/apk/debug/*.apk
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: frontend/android/app/build/outputs/apk/debug/*.apk
