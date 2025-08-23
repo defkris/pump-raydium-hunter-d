@@ -18,10 +18,11 @@ jobs:
         with:
           node-version: 18
 
-      # ---- FRONTEND: build Vite ----
+      # ---- FRONTEND: build Vite z adresem API ----
       - name: Build frontend
         working-directory: frontend
         run: |
+          echo 'VITE_API_URL=https://redesigned-broccoli-74wj5xg4q5534ww-8080.app.github.dev' > .env
           npm install
           npm run build
 
@@ -29,9 +30,8 @@ jobs:
       - name: Prepare Capacitor in frontend
         working-directory: frontend
         run: |
-          # pakiety do Capacitora + Androida
           npm install --save-dev @capacitor/core @capacitor/cli @capacitor/android
-          # U CIEBIE plik jest w mobile/mobile/ (zostawiamy tę ścieżkę)
+          # u Ciebie config jest w mobile/mobile/
           cp ../mobile/mobile/capacitor.config.json ./capacitor.config.json
           npx cap add android
           npx cap sync android
@@ -50,7 +50,7 @@ jobs:
         run: |
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      # ---- Podbij compileSdk do 35 (Capacitor >= 6 tego wymaga) ----
+      # ---- Podbij compileSdk do 35 (wymagane przez nowszy Capacitor) ----
       - name: Bump compileSdkVersion to 35
         run: |
           sed -i 's/compileSdkVersion = [0-9]\+/compileSdkVersion = 35/' frontend/android/variables.gradle || true
