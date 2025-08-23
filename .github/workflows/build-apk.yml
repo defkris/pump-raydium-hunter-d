@@ -25,16 +25,18 @@ jobs:
           npm run build
 
       # --- CAPACITOR PREP (w projekcie frontend/) ---
-      - name: Prepare Capacitor in frontend
-        working-directory: frontend
-        run: |
-          # pakiety potrzebne do cap
-          npm install @capacitor/core @capacitor/cli @capacitor/android --save-dev
-          # konfiguracja (mamy ją w repo w mobile/)
-          cp ../mobile/capacitor.config.ts ./capacitor.config.ts
-          npx cap add android
-          npx cap sync android
-
+      
+- name: Prepare Capacitor in frontend
+  working-directory: frontend
+  run: |
+    # pakiety potrzebne do cap
+    npm install @capacitor/core @capacitor/cli @capacitor/android --save-dev
+    # do TS configu
+    npm install typescript ts-node --save-dev
+    # konfiguracja (mamy ją w repo w mobile/)
+    cp ../mobile/capacitor.config.ts ./capacitor.config.ts
+    npx cap add android
+    npx cap sync android
       # --- ANDROID TOOLCHAIN ---
       - name: Setup Java
         uses: actions/setup-java@v4
