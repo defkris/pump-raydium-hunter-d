@@ -20,8 +20,8 @@ jobs:
       - name: Create Android project & copy web
         working-directory: frontend
         run: |
-          npx cap add android --skip-deps
-          npx cap copy
+          npx cap add android
+          npx cap sync android
       - uses: actions/setup-java@v4
         with: { distribution: 'temurin', java-version: '17' }
       - uses: android-actions/setup-android@v3
