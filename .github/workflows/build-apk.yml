@@ -47,7 +47,14 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+- name: Install Android 35 SDK + Build-Tools
+  run: |
+    sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
+- name: Bump compileSdkVersion to 35
+  run: |
+    sed -i 's/compileSdkVersion = [0-9]\+/compileSdkVersion = 35/' frontend/android/variables.gradle || true
+    sed -i 's/compileSdkVersion=[0-9]\+/compileSdkVersion=35/' frontend/android/variables.gradle || true
       # ---- Build APK ----
       - name: Build Debug APK
         working-directory: frontend/android
