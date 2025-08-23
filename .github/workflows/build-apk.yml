@@ -38,30 +38,30 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      # ---- Toolchain Android + Java ----
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
+      # ---- Toolchain Android + Java ----         - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "21"
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-- name: Install Android 35 SDK + Build-Tools
-  run: |
-    sdkmanager "platforms;android-35" "build-tools;35.0.0"
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
-- name: Bump compileSdkVersion to 35
-  run: |
-    sed -i 's/compileSdkVersion = [0-9]\+/compileSdkVersion = 35/' frontend/android/variables.gradle || true
-    sed -i 's/compileSdkVersion=[0-9]\+/compileSdkVersion=35/' frontend/android/variables.gradle || true
-      # ---- Build APK ----
-      - name: Build Debug APK
-        working-directory: frontend/android
-        run: ./gradlew assembleDebug
+    - name: Install Android 35 SDK + Build-Tools
+      run: |
+        sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: frontend/android/app/build/outputs/apk/debug/*.apk
+    - name: Bump compileSdkVersion to 35
+      run: |
+        sed -i 's/compileSdkVersion = [0-9]\+/compileSdkVersion = 35/' frontend/android/variables.gradle || true
+        sed -i 's/compileSdkVersion=[0-9]\+/compileSdkVersion=35/' frontend/android/variables.gradle || true
+
+    - name: Build Debug APK
+      working-directory: frontend/android
+      run: ./gradlew assembleDebug
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: frontend/android/app/build/outputs/apk/debug/*.apk
