@@ -1,33 +1,55 @@
 name: Build APK (Capacitor)
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 18 }
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # --- FRONTEND BUILD ---
       - name: Build frontend
         working-directory: frontend
         run: |
           npm install
           npm run build
-      - name: Install Capacitor CLI
-        run: npm i -g @capacitor/cli @capacitor/android
-      - name: Create Android project & copy web
+
+      # --- CAPACITOR PREP (w projekcie frontend/) ---
+      - name: Prepare Capacitor in frontend
         working-directory: frontend
         run: |
+          # pakiety potrzebne do cap
+          npm install @capacitor/core @capacitor/cli @capacitor/android --save-dev
+          # konfiguracja (mamy ją w repo w mobile/)
+          cp ../mobile/capacitor.config.ts ./capacitor.config.ts
           npx cap add android
           npx cap sync android
-      - uses: actions/setup-java@v4
-        with: { distribution: 'temurin', java-version: '17' }
-      - uses: android-actions/setup-android@v3
+
+      # --- ANDROID TOOLCHAIN ---
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # --- BUILD APK ---
       - name: Build Debug APK
         working-directory: frontend/android
         run: ./gradlew assembleDebug
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
