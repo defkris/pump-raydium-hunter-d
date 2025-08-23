@@ -34,7 +34,7 @@ jobs:
           # TypeScript jest wymagany, bo config jest .ts
           npm install --save-dev typescript ts-node
           # kopiujemy nasz config do frontu
-          cp ../mobile/capacitor.config.ts ./capacitor.config.ts
+          cp ../mobile/capacitor.config.json ./capacitor.config.json
           npx cap add android
           npx cap sync android
 
