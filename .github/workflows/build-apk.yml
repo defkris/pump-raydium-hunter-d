@@ -10,44 +10,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # --- FRONTEND BUILD ---
+      # ---- FRONTEND: build Vite ----
       - name: Build frontend
         working-directory: frontend
         run: |
           npm install
           npm run build
 
-      # --- CAPACITOR PREP (w projekcie frontend/) ---
-      
-- name: Prepare Capacitor in frontend
-  working-directory: frontend
-  run: |
-    # pakiety potrzebne do cap
-    npm install @capacitor/core @capacitor/cli @capacitor/android --save-dev
-    # do TS configu
-    npm install typescript ts-node --save-dev
-    # konfiguracja (mamy ją w repo w mobile/)
-    cp ../mobile/capacitor.config.ts ./capacitor.config.ts
-    npx cap add android
-    npx cap sync android
-      # --- ANDROID TOOLCHAIN ---
+      # ---- CAPACITOR: przygotowanie w katalogu frontend/ ----
+      - name: Prepare Capacitor in frontend
+        working-directory: frontend
+        run: |
+          # pakiety potrzebne do Capacitora i Androida
+          npm install --save-dev @capacitor/core @capacitor/cli @capacitor/android
+          # TypeScript jest wymagany, bo config jest .ts
+          npm install --save-dev typescript ts-node
+          # kopiujemy nasz config do frontu
+          cp ../mobile/capacitor.config.ts ./capacitor.config.ts
+          npx cap add android
+          npx cap sync android
+
+      # ---- Toolchain Android + Java ----
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: "17"
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # --- BUILD APK ---
+      # ---- Build APK ----
       - name: Build Debug APK
         working-directory: frontend/android
         run: ./gradlew assembleDebug
