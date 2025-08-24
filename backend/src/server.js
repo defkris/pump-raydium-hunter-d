@@ -16,3 +16,29 @@ app.post('/seed-demo', (req,res)=>{ const now=Date.now(); for(let i=0;i<20;i++){
   holders:60+i*10, devReputation:50+(i%5)*5, riskTags:i%3===0?['sus-dev']:[], dex:i%2===0?'Raydium':'PumpSwap', poolAddress:`pool_${i}`,
   timeISO:new Date(now - i*15*60*1000).toISOString(), bondingCurveProgress:100 }) } res.json({ok:true}) })
 app.listen(PORT, ()=> console.log('backend on', PORT))
+// ===== prościutki store w pamięci =====
+const state = {
+  tokens: [],   // lista jednolita do frontu
+  updatedAt: null,
+};
+
+async function refreshRaydium() {
+  try {
+    const pairs = await fetchRaydiumPairs();
+    // łączymy z tym co już jest (prosto: podmieniamy całość z Raydium)
+    // Jeżeli masz też inne źródła, tu zrobisz merge po 'mint' lub 'poolAddress'
+    state.tokens = pairs;
+    state.updatedAt = new Date().toISOString();
+    console.log(`[raydium] refreshed ${pairs.length} pairs`);
+  } catch (e) {
+    console.error("[raydium] refresh error:", e.message);
+  }
+}
+
+// start + co 30s
+await refreshRaydium();
+setInterval(refreshRaydium, 30_000);
+
+// ====== endpointy ======
+app.get("/health", (_req, res) => res.json({ ok: true, updatedAt: state.updatedAt, count: state.tokens.length }));
+app.get("/tokens", (_req, res) => res.json({ items: state.tokens, updatedAt: state.updatedAt }));
